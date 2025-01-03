@@ -1,0 +1,68 @@
+-- Create database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS coursekori;
+USE coursekori;
+
+-- Drop tables if they exist
+DROP TABLE IF EXISTS course_ratings;
+DROP TABLE IF EXISTS enrollment;
+DROP TABLE IF EXISTS courses_interests;
+DROP TABLE IF EXISTS user_interests;
+DROP TABLE IF EXISTS course;
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS interest;
+DROP TABLE IF EXISTS feedback;
+
+-- Create tables
+CREATE TABLE user (
+  id CHAR(36) NOT NULL,
+  email VARCHAR(191) NOT NULL,
+  firstName VARCHAR(191) NOT NULL,
+  lastName VARCHAR(191) NOT NULL,
+  password VARCHAR(191) NOT NULL,
+  isAdmin BOOLEAN DEFAULT FALSE,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE interest (
+  id CHAR(36) NOT NULL,
+  name VARCHAR(191) NOT NULL,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE course (
+  id CHAR(36) NOT NULL,
+  title VARCHAR(191) NOT NULL,
+  description TEXT NOT NULL,
+  imageUrl VARCHAR(191) NOT NULL,
+  instructor VARCHAR(191) NOT NULL,
+  duration VARCHAR(191) NOT NULL,
+  level ENUM('BEGINNER','INTERMEDIATE','ADVANCED') NOT NULL,
+  status ENUM('draft','published','archived') DEFAULT 'draft',
+  rating FLOAT DEFAULT 0,
+  students INT DEFAULT 0,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE feedback (
+  id CHAR(36) NOT NULL,
+  courseId CHAR(36) NOT NULL,
+  userId CHAR(36) NOT NULL,
+  message TEXT NOT NULL,
+  isRead BOOLEAN DEFAULT FALSE,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY courseId (courseId),
+  KEY userId (userId),
+  CONSTRAINT feedback_ibfk_1 FOREIGN KEY (courseId) REFERENCES course (id) ON DELETE CASCADE,
+  CONSTRAINT feedback_ibfk_2 FOREIGN KEY (userId) REFERENCES user (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Rest of the existing tables...
