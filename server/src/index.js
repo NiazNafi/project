@@ -13,6 +13,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import courseSetupRoutes from "./routes/courseSetupRoutes.js";
 import chat from "./routes/chat.js";
+import interestRoutes from "./routes/interestRoutes.js";
 
 config();
 
@@ -48,6 +49,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/course-setup", courseSetupRoutes);
 app.use("/api/chat", chat);
+app.use("/api/interests", interestRoutes);
 
 // Error handling
 app.use(notFoundHandler);

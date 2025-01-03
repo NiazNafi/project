@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Message } from "../types";
-
 import { ChatGroq } from "@langchain/groq";
 
 const model = new ChatGroq({
@@ -34,7 +33,7 @@ export function useChat() {
     };
     setMessages((prev) => [...prev, userMessage]);
 
-    // Update message history
+    // Update message history with chapter-specific context
     const updatedHistory = [
       ...messageHistory,
       {
@@ -79,6 +78,6 @@ export function useChat() {
     messages,
     isTyping,
     sendMessage,
-    setMessages
+    setMessages,
   };
 }

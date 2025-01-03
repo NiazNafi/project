@@ -1,26 +1,26 @@
-import { CourseSetupModel } from '../models/courseSetupModel.js';
-
+import { CourseSetupModel } from "../models/courseSetupModel.js";
+import { InterestModel } from "../models/interestModel.js";
 export const CourseSetupController = {
   getCourseDetails: async (req, res) => {
     try {
       const { courseId } = req.params;
       const courseDetails = await CourseSetupModel.getCourseDetails(courseId);
-
+      courseDetails.categories = await InterestModel.findAll();
       if (!courseDetails) {
         return res.status(404).json({
           success: false,
-          error: { message: 'Course not found' }
+          error: { message: "Course not found" },
         });
       }
 
       res.json({
         success: true,
-        data: courseDetails
+        data: courseDetails,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: { message: 'Error fetching course details' }
+        error: { message: "Error fetching course details" },
       });
     }
   },
@@ -34,12 +34,12 @@ export const CourseSetupController = {
 
       res.json({
         success: true,
-        message: 'Course details updated successfully'
+        message: "Course details updated successfully",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: { message: 'Error updating course details' }
+        error: { message: "Error updating course details" },
       });
     }
   },
@@ -52,7 +52,7 @@ export const CourseSetupController = {
       // Update course details with published status
       await CourseSetupModel.updateCourseDetails(courseId, {
         ...courseData,
-        status: 'published'
+        status: "published",
       });
 
       // Update chapters if provided
@@ -62,12 +62,12 @@ export const CourseSetupController = {
 
       res.json({
         success: true,
-        message: 'Course published successfully'
+        message: "Course published successfully",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: { message: 'Error publishing course' }
+        error: { message: "Error publishing course" },
       });
     }
   },
@@ -79,12 +79,12 @@ export const CourseSetupController = {
 
       res.json({
         success: true,
-        message: 'Chapter order updated successfully'
+        message: "Chapter order updated successfully",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: { message: 'Error updating chapter order' }
+        error: { message: "Error updating chapter order" },
       });
     }
   },
@@ -94,16 +94,19 @@ export const CourseSetupController = {
       const { courseId } = req.params;
       const chapterData = req.body;
 
-      const chapterId = await CourseSetupModel.addChapter(courseId, chapterData);
+      const chapterId = await CourseSetupModel.addChapter(
+        courseId,
+        chapterData
+      );
 
       res.status(201).json({
         success: true,
-        data: { id: chapterId }
+        data: { id: chapterId },
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: { message: 'Error adding chapter' }
+        error: { message: "Error adding chapter" },
       });
     }
   },
@@ -115,13 +118,13 @@ export const CourseSetupController = {
 
       res.json({
         success: true,
-        message: 'Chapter deleted successfully'
+        message: "Chapter deleted successfully",
       });
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: { message: 'Error deleting chapter' }
+        error: { message: "Error deleting chapter" },
       });
     }
-  }
+  },
 };

@@ -41,9 +41,9 @@ export const CourseSetupModel = {
 
     return courseDetails;
   },
-    updateCourseDetails: async (courseId, courseData) => {
-    const { title, description, imageUrl, status, interestId } = courseData;
-    
+  updateCourseDetails: async (courseId, courseData) => {
+    const { title, description, imageUrl, status, categories } = courseData;
+
     try {
       // Update course details
       const courseSql = `
@@ -53,21 +53,48 @@ export const CourseSetupModel = {
       `;
       await query(courseSql, [title, description, imageUrl, status, courseId]);
 
-      // Update category/interest
-      if (interestId) {
-        // First delete existing interest mapping
+      if (categories && categories.length > 0) {
+        // Step 1: Retrieve existing interests
+        const existingInterestsSql = `
+          SELECT name FROM interest
+        `;
+        const existingInterests = await query(existingInterestsSql, []);
+        const existingInterestNames = existingInterests.map((i) => i.name);
+
+        // Step 2: Find new interests
+        const newInterests = categories.filter(
+          (category) => !existingInterestNames.includes(category.name)
+        );
+
+        // Step 3: Insert new interests
+        if (newInterests.length > 0) {
+          const insertInterestSql = `
+            INSERT INTO interest (id, name, createdAt, updatedAt, icon)
+            VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?)
+          `;
+          for (const interest of newInterests) {
+            await query(insertInterestSql, [
+              interest.id,
+              interest.name,
+              interest.icon,
+            ]);
+          }
+        }
+
+        // Step 4: Update course-interest mapping
         const deleteSql = `
           DELETE FROM courses_interests 
           WHERE courseId = ?
         `;
         await query(deleteSql, [courseId]);
 
-        // Then insert new interest mapping
-        const insertSql = `
+        const insertMappingSql = `
           INSERT INTO courses_interests (courseId, interestId)
-          VALUES (?, ?)
+          SELECT ?, id FROM interest WHERE name = ?
         `;
-        await query(insertSql, [courseId, interestId]);
+        for (const category of categories) {
+          await query(insertMappingSql, [courseId, category.id]);
+        }
       }
     } catch (error) {
       logger.error(
