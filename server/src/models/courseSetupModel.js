@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 
 export const CourseSetupModel = {
   getCourseDetails: async (courseId) => {
-    // First get course details
     const courseSql = `
       SELECT 
         c.id, 
@@ -16,7 +15,7 @@ export const CourseSetupModel = {
         c.level, 
         c.status,
         ci.interestId,
-        i.name as category
+        i.id as category
       FROM course c
       LEFT JOIN courses_interests ci ON c.id = ci.courseId
       LEFT JOIN interest i ON i.id = ci.interestId
@@ -24,7 +23,6 @@ export const CourseSetupModel = {
     `;
     const courses = await query(courseSql, [courseId]);
 
-    // Then get chapters
     const chaptersSql = `
       SELECT id, title, video_link, text_note, \`order\`
       FROM chapter
@@ -33,7 +31,6 @@ export const CourseSetupModel = {
     `;
     const chapters = await query(chaptersSql, [courseId]);
 
-    // Combine the results
     const courseDetails = courses[0];
     if (courseDetails) {
       courseDetails.chapters = chapters;
@@ -41,11 +38,12 @@ export const CourseSetupModel = {
 
     return courseDetails;
   },
+
   updateCourseDetails: async (courseId, courseData) => {
-    const { title, description, imageUrl, status, categories } = courseData;
+    const { title, description, imageUrl, status, categories, category } =
+      courseData;
 
     try {
-      // Update course details
       const courseSql = `
         UPDATE course
         SET title = ?, description = ?, imageUrl = ?, status = ?, updatedAt = CURRENT_TIMESTAMP
@@ -54,19 +52,16 @@ export const CourseSetupModel = {
       await query(courseSql, [title, description, imageUrl, status, courseId]);
 
       if (categories && categories.length > 0) {
-        // Step 1: Retrieve existing interests
         const existingInterestsSql = `
           SELECT name FROM interest
         `;
         const existingInterests = await query(existingInterestsSql, []);
         const existingInterestNames = existingInterests.map((i) => i.name);
 
-        // Step 2: Find new interests
         const newInterests = categories.filter(
           (category) => !existingInterestNames.includes(category.name)
         );
 
-        // Step 3: Insert new interests
         if (newInterests.length > 0) {
           const insertInterestSql = `
             INSERT INTO interest (id, name, createdAt, updatedAt, icon)
@@ -81,7 +76,6 @@ export const CourseSetupModel = {
           }
         }
 
-        // Step 4: Update course-interest mapping
         const deleteSql = `
           DELETE FROM courses_interests 
           WHERE courseId = ?
@@ -90,11 +84,9 @@ export const CourseSetupModel = {
 
         const insertMappingSql = `
           INSERT INTO courses_interests (courseId, interestId)
-          SELECT ?, id FROM interest WHERE name = ?
+          VALUES (?, ?)
         `;
-        for (const category of categories) {
-          await query(insertMappingSql, [courseId, category.id]);
-        }
+        await query(insertMappingSql, [courseId, category]);
       }
     } catch (error) {
       logger.error(
@@ -104,7 +96,6 @@ export const CourseSetupModel = {
     }
   },
 
-  // Method to update chapters
   updateChapters: async (courseId, chapters) => {
     const updateSql = `
       UPDATE chapter
@@ -121,18 +112,15 @@ export const CourseSetupModel = {
       for (const chapter of chapters) {
         const { id, title, video_link, text_note, order } = chapter;
 
-        // Ensure no undefined values are passed
         const safeTitle = title !== undefined ? title : null;
         const safeVideoLink = video_link !== undefined ? video_link : null;
         const safeTextNote = text_note !== undefined ? text_note : null;
         const safeOrder = order !== undefined ? order : null;
 
-        // Check if chapter exists
         const checkSql = `SELECT COUNT(*) as count FROM chapter WHERE course_id = ? AND id = ?`;
         const result = await query(checkSql, [courseId, id]);
 
         if (result[0].count > 0) {
-          // Update existing chapter
           logger.info(
             `Updating chapter with id ${id} for courseId ${courseId}`
           );
@@ -145,7 +133,6 @@ export const CourseSetupModel = {
             id,
           ]);
         } else {
-          // Insert new chapter
           logger.info(
             `Inserting new chapter with id ${id} for courseId ${courseId}`
           );
@@ -161,7 +148,30 @@ export const CourseSetupModel = {
       }
     } catch (error) {
       logger.error(
-        `Error updating chapters for title ${title} courseId ${courseId}: ${error.message}`
+        `Error updating chapters for courseId ${courseId}: ${error.message}`
+      );
+      throw error;
+    }
+  },
+
+  deleteCourse: async (courseId) => {
+    try {
+      const deleteCourseSql = `
+      DELETE FROM course WHERE id = ?
+    `;
+    const result = await query(deleteCourseSql, [courseId]); // Assuming `query` returns an object with affected rows
+
+    // Log the number of rows affected
+    if (result.affectedRows > 0) {
+      logger.info(`Course with id ${courseId} deleted successfully`);
+    } else {
+      logger.warn(`No course found with id ${courseId} to delete`);
+    }
+
+    return result.affectedRows; // Return the number of affected rows
+    } catch (error) {
+      logger.error(
+        `Error deleting course with id ${courseId}: ${error.message}`
       );
       throw error;
     }

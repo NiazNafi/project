@@ -10,6 +10,7 @@ router.use(adminAuth);
 // Course details routes
 router.get('/:courseId', asyncHandler(CourseSetupController.getCourseDetails));
 router.put('/:courseId', asyncHandler(CourseSetupController.updateCourseDetails));
+router.delete('/:courseId', asyncHandler(CourseSetupController.deleteCourse));
 
 // Chapter management routes
 router.post('/:courseId/chapters', asyncHandler(CourseSetupController.addChapter));

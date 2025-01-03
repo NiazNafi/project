@@ -1,20 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Plus, MessageSquare, Edit2 } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { CourseStatus } from '../../types/course';
-import { StatusBadge } from './StatusBadge';
-import { NewCourseModal } from './NewCourseModal';
-import { SearchBar } from './SearchBar';
-import { AdminService, AdminCourse } from '../../services/admin';
-import { v4 as uuidv4 } from 'uuid';
+import { useState, useEffect } from "react";
+import { Plus, MessageSquare, Edit2, Trash2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { CourseStatus } from "../../types/course";
+import { StatusBadge } from "./StatusBadge";
+import { NewCourseModal } from "./NewCourseModal";
+import { DeleteCourseModal } from "./DeleteCourseModal";
+import { SearchBar } from "./SearchBar";
+import { AdminService, AdminCourse } from "../../services/admin";
+import { v4 as uuidv4 } from "uuid";
 
 export function CourseList() {
   const [isNewCourseModalOpen, setIsNewCourseModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState<AdminCourse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | undefined>(
+    undefined
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,22 +32,31 @@ export function CourseList() {
       if (response.success && response.data) {
         setCourses(response.data);
       } else {
-        toast.error(response.error?.message || 'Failed to load courses');
+        toast.error(response.error?.message || "Failed to load courses");
       }
     } catch (error) {
-      toast.error('An error occurred while loading courses');
+      toast.error("An error occurred while loading courses");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleEditCourse = (courseId: string) => {
-    navigate(`/admin/courses/${courseId}/edit`, { state: { fromEditButton: true } });
+    navigate(`/admin/courses/${courseId}/edit`, {
+      state: { fromEditButton: true },
+    });
+  };
+
+  const handleDeleteCourse = (courseId: string) => {
+    setSelectedCourseId(courseId);
+    setIsDeleteModalOpen(true);
   };
 
   const handleNewCourse = () => {
     const newCourseId = uuidv4();
-    navigate(`/admin/courses/${newCourseId}/edit`, { state: { fromNewCourse: true } });
+    navigate(`/admin/courses/${newCourseId}/edit`, {
+      state: { fromNewCourse: true },
+    });
   };
 
   return (
@@ -59,7 +73,10 @@ export function CourseList() {
       </div>
 
       <div className="max-w-md">
-        <SearchBar onSearch={setSearchQuery} placeholder="Search courses by title..." />
+        <SearchBar
+          onSearch={setSearchQuery}
+          placeholder="Search courses by title..."
+        />
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -96,8 +113,12 @@ export function CourseList() {
                   className="hover:bg-gray-50"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{course.title}</div>
-                    <div className="text-sm text-gray-500">{course.instructor}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {course.title}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {course.instructor}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <StatusBadge status={course.status} />
@@ -112,11 +133,17 @@ export function CourseList() {
                           </span>
                         )}
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleEditCourse(course.id)}
                         className="p-2 text-gray-400 hover:text-blue-900 transition-colors"
                       >
                         <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCourse(course.id)}
+                        className="p-2 text-gray-400 hover:text-blue-900 transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </td>
@@ -136,6 +163,12 @@ export function CourseList() {
       <NewCourseModal
         isOpen={isNewCourseModalOpen}
         onClose={() => setIsNewCourseModalOpen(false)}
+      />
+      <DeleteCourseModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        courseId={selectedCourseId}
+        setCourses={setCourses}
       />
     </div>
   );

@@ -43,6 +43,20 @@ export const CourseSetupService = {
       };
     }
   },
+  deleteCourse: async (courseId: string): Promise<CourseSetupResponse> => {
+    try {
+      const response = await api.delete(`/course-setup/${courseId}`);
+      return response.data;
+    } catch (error: any) {
+      return {
+        success: false,
+        error: {
+          message: error.response?.data?.error?.message || 'Error deleting course'
+        }
+      };
+    }
+  },
+  
 
 
 

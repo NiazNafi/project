@@ -110,6 +110,29 @@ export const CourseSetupController = {
       });
     }
   },
+  deleteCourse: async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const affectedRows = await CourseSetupModel.deleteCourse(courseId);
+
+if (affectedRows === 0) {
+  return res.status(404).json({
+    success: false,
+    error: { message: "Course not found or already deleted" },
+  });
+}
+
+res.json({
+  success: true,
+  message: "Course deleted successfully",
+});
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        error: { message: "Error deleting course" },
+      });
+    }
+  },
 
   deleteChapter: async (req, res) => {
     try {
