@@ -1,4 +1,4 @@
-import { BookOpen, Brain, Edit3 } from 'lucide-react';
+import { BookOpen, Brain, Edit3, ClipboardList } from 'lucide-react';
 
 export type TabType = 'overview' | 'content' | 'notes' | 'reviews' | 'ai';
 
@@ -13,6 +13,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
     { id: 'content' as const, icon: <Edit3 className="w-4 h-4" />, label: 'Course Content' },
     { id: 'notes' as const, icon: <BookOpen className="w-4 h-4" />, label: 'Notes' },
     { id: 'reviews' as const, icon: <Edit3 className="w-4 h-4" />, label: 'Reviews' },
+    { id: 'MCQ' as const, icon: <ClipboardList className="w-4 h-4" />, label: 'MCQ' },
     { id: 'ai' as const, icon: <Brain className="w-4 h-4" />, label: 'AI Help' }
   ];
 

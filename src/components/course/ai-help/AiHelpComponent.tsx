@@ -4,18 +4,24 @@ import { ChatInput } from "./ChatInput";
 import { ChatHeader } from "./ChatHeader";
 import ReactMarkdown from "react-markdown";
 import { Message } from "./types";
+import DefaultQ from "./defaultQ";
 
 export default function AiHelp({
   courseChapterText,
-  messages, isTyping, sendMessage
+  messages,
+  isTyping,
+  sendMessage,
 }: {
   courseChapterText: string;
-  messages:Message[];
-  isTyping:Boolean;
-  sendMessage:(content: string, courseChapterText: string) => Promise<void>;
+  messages: Message[];
+  isTyping: Boolean;
+  sendMessage: (content: string, courseChapterText: string) => Promise<void>;
 }) {
-  // const { messages, isTyping, sendMessage } = useChat();
   const [inputValue, setInputValue] = useState("");
+
+  const handleQuestionClick = (question: string) => {
+    setInputValue(question);
+  };
 
   const handleSend = () => {
     if (inputValue.trim()) {
@@ -27,6 +33,10 @@ export default function AiHelp({
   return (
     <div className="bg-white rounded-lg shadow-sm flex flex-col h-[600px]">
       <ChatHeader />
+      <DefaultQ
+        chapterText={courseChapterText}
+        onQuestionClick={handleQuestionClick}
+      />
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div
@@ -64,7 +74,9 @@ export default function AiHelp({
         ))}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg p-3 text-sm font-medium tracking-wide">Typing...</div>
+            <div className="bg-gray-100 rounded-lg p-3 text-sm font-medium tracking-wide">
+              Typing...
+            </div>
           </div>
         )}
       </div>

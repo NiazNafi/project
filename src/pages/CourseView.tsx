@@ -15,6 +15,7 @@ import AiHelp from "../components/course/ai-help/AiHelpComponent";
 import { CourseService, CourseDetails } from "../services/course";
 import CourseViewNavbar from "../components/course/CourseViewNavbar";
 import { useChat } from "../components/course/ai-help/hooks/useChat";
+import AiMcq from "../components/course/AiMcq";
 
 export function CourseView() {
   const { id: courseId } = useParams<{ id: string }>();
@@ -27,7 +28,7 @@ export function CourseView() {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
-  const { messages, isTyping, sendMessage, setMessages } = useChat();
+  const { messages, isTyping, sendMessage } = useChat();
 
   useEffect(() => {
     if (courseId) {
@@ -80,14 +81,14 @@ export function CourseView() {
   const currentChapter = courseDetails.chapters[currentChapterIndex];
   const handleChapterIdxChange = (index: number) => {
     setCurrentChapterIndex(index);
-    setMessages([
-      {
-        id: "1",
-        content: `Anything you need for this ${courseDetails.chapters[index].title}?`,
-        sender: "ai",
-        timestamp: new Date(),
-      },
-    ]);
+    // setMessages([
+    //   {
+    //     id: "1",
+    //     content: `Anything you need for this ${courseDetails.chapters[index].title}?`,
+    //     sender: "ai",
+    //     timestamp: new Date(),
+    //   },
+    // ]);
   };
 
   return (
@@ -133,6 +134,12 @@ export function CourseView() {
                   />
                 )}
                 {activeTab === "reviews" && <CourseReviews />}
+                {activeTab === "MCQ" && <AiMcq 
+                chapterText={
+                  courseDetails.chapters[currentChapterIndex]
+                    .textNote as string
+                }
+                />}
                 {activeTab === "ai" && (
                   <AiHelp
                     key={currentChapterIndex}
@@ -145,6 +152,7 @@ export function CourseView() {
                     }
                   />
                 )}
+                
               </div>
             </div>
           )}
