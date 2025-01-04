@@ -1,6 +1,6 @@
 import { BookOpen, Brain, Edit3, ClipboardList } from 'lucide-react';
 
-export type TabType = 'overview' | 'content' | 'notes' | 'reviews' | 'ai';
+export type TabType = 'overview' | 'content' | 'notes' | 'reviews' | 'ai' | "MCQ";
 
 interface TabNavigationProps {
   activeTab: TabType;

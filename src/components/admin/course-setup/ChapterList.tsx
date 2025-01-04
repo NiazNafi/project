@@ -82,7 +82,7 @@ export function ChapterList({ courseId, chapters, onUpdate, onAdd, onRemove }: C
             <Reorder.Item
               key={chapter.id}
               value={chapter}
-              dragListener={false}
+              dragListener={true}
               dragControls={dragControls}
             >
               <motion.div
@@ -92,7 +92,7 @@ export function ChapterList({ courseId, chapters, onUpdate, onAdd, onRemove }: C
                 <div className="flex items-center space-x-4">
                   <button
                     className="cursor-move"
-                    onPointerDown={(e) => dragControls.start(e)}
+                    // onPointerDown={(e) => dragControls.start(e)}
                   >
                     <GripVertical className="w-5 h-5 text-gray-400" />
                   </button>
